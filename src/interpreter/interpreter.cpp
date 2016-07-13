@@ -261,8 +261,15 @@ bool interpreter::is_term_closed_rec(ast_node_t const& tree, std::set<var_t>& ac
     else//if (tree->type == astt::ABS)      //its a lambda
     {
         var_t abst_var = tree->c1->var;
-        acc.insert(abst_var);
-        return is_term_closed_rec(tree->c2, acc);
+        bool is_in = acc.count(abst_var);
+        if (! is_in)
+            acc.insert(abst_var);
+
+        bool ret = is_term_closed_rec(tree->c2, acc);
+
+        if (! is_in)
+            acc.erase(abst_var);
+        return ret;
     }
 }
 
@@ -283,7 +290,7 @@ bool interpreter::is_free_in(ast_node_t const& tree, var_t &x)
     }
 }
 
-/*std::set<var_t> interpreter::FV(ast_node_t const& tree)
+std::set<var_t> interpreter::FV(ast_node_t const& tree)
 {
     std::set<var_t> ret;
 
@@ -310,7 +317,7 @@ void interpreter::FV_rec(ast_node_t const& tree, std::set<var_t>& acc)
         if (! is_in)
             acc.erase(abst_var);
     }
-}*/
+}
 
 inline var_t interpreter::get_z()
 {

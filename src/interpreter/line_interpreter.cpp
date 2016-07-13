@@ -65,7 +65,7 @@ int line_interpreter::run()
                 continue;
             }
 
-            if (input[0] == L':' || input[0] == L'.')
+            if (input[0] == L':' || input[0] == L'.' || input[0] == L'-')
             {
                 if (interpret_command(input))
                     return 0;
@@ -79,7 +79,7 @@ int line_interpreter::run()
     }
     else
     {
-        std::vector<evaled_exp> exps = interpret_line(L"40000");
+        std::vector<evaled_exp> exps = interpret_line(L"10000");
         print(exps, (exps.size() == 1));
     }
 

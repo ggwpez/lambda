@@ -1,0 +1,42 @@
+let id   = \x.x in
+let true  = \x.\y. x in
+let false = \x.\y. y in
+
+let zero = \f.\x. x in
+let one  = \f.\x. f x in
+let two  = \f.\x. f (f x) in
+let three= \f.\x. f (f (f x)) in
+let four = \f.\x. f (f (f (f x))) in
+
+let J = \f.\x.\y. y f x in
+let Y = \f. (\x. f (x x)) (\x. f (x x)) in
+
+let succ = \n.\f.\x. f (n f x) in
+let pred = \n.\f.\x. n (\g.\h.h (g f)) (\u.x) (\j.j) in
+
+let add  = J succ in
+let sub  = J pred in
+let mul  = \m.\n.\f.m (n f) in
+let pow  = \b.\e. e b in
+let sqr  = \x. mul x x in
+
+let and = \x.\y. x y x in
+let or  = \x.\y. x x y in
+let not = \x. x false true in
+let ifte = \b.\i.\e. b i e in
+
+let iszero = \x. x (\z. false) true in
+let eq     = \a.\b. and (iszero (sub a b)) (iszero (sub b a)) in
+let less   = \a.\b. not (iszero (sub b a)) in
+let greater= \a.\b. not (iszero (sub a b)) in
+let leq    = \a.\b. iszero (sub a b) in
+let geq    = \a.\b. iszero (sub b a) in
+
+let fac_helper = \rec.\n. (iszero n) one (mul n (rec (pred n))) in
+let fac = Y fac_helper in
+
+let fib_helper = \rec.\n. (leq n two) one (add (rec (pred n)) (rec (pred (pred n)))) in
+let fib = Y fib_helper in
+
+let sum_helper = \rec.\n. (iszero n) zero (add n (rec (pred n))) in
+let sum = Y sum_helper in

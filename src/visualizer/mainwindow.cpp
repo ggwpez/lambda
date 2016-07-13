@@ -28,6 +28,8 @@ QPointF const   d_r(sqrt(2), sqrt(2)),
 QFont           legend_font("Ubuntu Mono"),
                 var_font("Numbus Mono L", 6);
 
+char const* scope_path = "../../scope.lam";
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), info(new InfoForm()), ui(new Ui::MainWindow), tree()
 {
@@ -40,13 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
     info->show();
 
     std::wstringstream ss;
-    if (! io::read_file("scope.lam", ss))
+    if (! io::read_file(scope_path, ss))
     {
         this->scope = ss.str() + std::wstring(L"\n");
         this->ui->checkBox->setEnabled(true);
     }
     else
-        std::wcout << L"< File not found: scope.lam>" << std::endl;
+        std::wcout << L"< File not found: " << scope_path << " >" << std::endl;
 
     on_chb_aa_toggled(true);
 }

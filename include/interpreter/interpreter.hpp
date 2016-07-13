@@ -44,8 +44,8 @@ private:
     bool is_term_closed_rec(ast_node_t const& tree, std::set<var_t>& acc);
 
     bool is_free_in(ast_node_t const& tree, var_t &x);
-    //std::set<var_t> FV(ast_node_t const& tree);
-    //void FV_rec(ast_node_t const& tree, std::set<var_t>& acc);
+    std::set<var_t> FV(ast_node_t const& tree);
+    void FV_rec(ast_node_t const& tree, std::set<var_t>& acc);
 
     var_t get_z();
 
