@@ -86,7 +86,7 @@ void MainWindow::draw_legend(QPointF const& start)
 
 void MainWindow::paintEvent(QPaintEvent* e Q_DECL_UNUSED)
 {
-    if (1)//(tree.get())
+    if (tree.get())
     {
         rects.clear();
         names.clear();
@@ -136,8 +136,8 @@ int const process_events = 1000;
 
 void MainWindow::eval(bool init_eval, unsigned steps)
 {
-    if (info->get_steps() +steps > (unsigned)ui->sb_max_step->value())
-        steps = std::min(ui->sb_max_step->value() -info->get_steps(), steps);
+    //if (info->get_steps() +steps > (unsigned)ui->sb_max_step->value())
+      //  steps = std::min(ui->sb_max_step->value() -info->get_steps(), steps);
 
     if (init_eval)
     {
@@ -169,7 +169,7 @@ void MainWindow::eval(bool init_eval, unsigned steps)
         {
             tree = inter.single_step(old, c, &infos);
 
-            if (! ast_traits::equals(old, tree))
+            if (c)
                 info->add_info(infos, !redraw_d || !(i % redraw_d));
             else
                 break;
@@ -188,7 +188,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 
     if (event->key() == Qt::Key_N)
         toggle_name_visibility();
-    else if (event->key() == Qt::Key_Plus && 1)//tree.get())
+    else if (event->key() == Qt::Key_Plus && tree.get())
     {
         eval(false);
         this->repaint();
