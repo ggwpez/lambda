@@ -13,12 +13,25 @@
 #include <string>
 #include <iostream>
 #include <unistd.h>
+#include <csignal>
 
 #define TEST 0
 
-line_interpreter::line_interpreter(int argc, char** argv)
-    : mode(inter_ops_t::DEFAULT), scope()
+line_interpreter* ptr = nullptr;
+static void sigint_action(int signum)
 {
+    if (ptr)
+        ptr->sigint_handler(signum);
+    else
+        std::wcerr << L"Unhandled 'SIGINT'" << std::endl;
+}
+
+line_interpreter::line_interpreter(int argc, char** argv)
+    : scope(), inter()
+{
+    ptr = this;
+    signal(SIGINT, sigint_action);
+
     int c = 0;
     while ((c = getopt(argc, argv, "s:i:f:l:")) != -1)
     {
@@ -57,7 +70,7 @@ int line_interpreter::run()
         while (1)
         {
             std::wstring input;
-            std::wcout << L"< ";
+            std::wcout << BANG_IN;
             std::getline(std::wcin, input);
             if (! input.size())
             {
@@ -79,7 +92,7 @@ int line_interpreter::run()
     }
     else
     {
-        std::vector<evaled_exp> exps = interpret_line(L"10000");
+        std::vector<evaled_exp> exps = interpret_line(L"5 5");
         print(exps, (exps.size() == 1));
     }
 
@@ -99,13 +112,17 @@ int line_interpreter::interpret_command(std::wstring const& cmd)
         std::wcout << "\033c";
     else if (cmd[1] == L'r')
     {
-        this->scope = L"";
-        outl(L"< Scope reset >");
+        this->scope.clear();
+        outl(MSG_B << L"Scope reset" << MSG_E);
     }
+    else if (cmd[1] == L'p')
+        outl(this->scope);
     else if (cmd[1] == L's')
         set_scope_file(cmd.substr(2, std::wstring::npos));
     else if (cmd[1] == L't')
-        this->mode = inter_ops_t::TRACE;
+        this->enable_trace = true;
+    else
+        outl(MSG_B << L"Unknown command: '" << cmd << L'\'' << MSG_E);
 
     return 0;
 }
@@ -115,22 +132,21 @@ void line_interpreter::print(std::vector<evaled_exp> const& exps, bool supp_in_p
     for (evaled_exp const& e : exps)
     {
         if (! supp_in_print)
-            std::wcout << L"< " << e.input << std::endl;
+            std::wcout << BANG_IN << e.input << std::endl;
 
-        if (e.state == inter_ret_state_t::OK)
-        {
-            if (e.tree)
-            {
-                outl(e.tree->to_str());
-                std::wcout << e.info.to_str() << std::endl;
-            }
-            else
-                std::wcout << L"< NULL >";
-        }
-        else if (e.state == inter_ret_state_t::MAX_SUBST_ITER_REACHED)
-            outl(L"< NULL > Step reached.");
+        if (e.tree)
+            outl(e.tree->to_str());
         else
-            outl(L"< NULL > Unknown error.");
+            outl(MSG_B << L"<NULL>" << MSG_E);
+
+        if (e.state == inter_ret_state_t::MAX_SUBST_ITER_REACHED)
+            outl(MSG_B << L"Max Step count reached" << MSG_E);
+        else if (e.state == inter_ret_state_t::CANCEL)
+            outl(MSG_B << L"Canceled" << MSG_E);
+        else if (e.state == inter_ret_state_t::ERR)
+            outl(MSG_B << L"Unknown error" << MSG_E);
+        else if (enable_trace)
+            outl(MSG_B << e.info.to_str() << MSG_E);
     }
 }
 
@@ -142,10 +158,10 @@ void line_interpreter::set_scope_file(std::wstring const& file)
     if (! io::read_file(filen.c_str(), ss))
     {
         this->scope = ss.str() + std::wstring(L"\n");
-        outl(L"< Scope set (" << file << ") >");
+        outl(MSG_B << L"Scope set (" << file << L')' << MSG_E);
     }
     else
-        outl(L"< File not found: " << file << L" >");
+        outl(MSG_B << L"File not found: " << file << MSG_E);
 }
 
 std::vector<evaled_exp> line_interpreter::interpret_file(std::wstring const& file)
@@ -157,11 +173,11 @@ std::vector<evaled_exp> line_interpreter::interpret_file(std::wstring const& fil
     {
         std::wstring const& input = ss.str();
 
-        outl(L"< Interpreting file: " << file << L" >");
+        outl(MSG_B << L"Interpreting file: " << file << MSG_E);
         return interpret_line(input);
     }
     else
-        outl(L"File not found: " << file);
+        outl(MSG_B << L"File not found: " << file << MSG_E);
 
     return std::vector<evaled_exp>();
 }
@@ -202,12 +218,18 @@ evaled_exp line_interpreter::interpret_exp(std::wstring const& in)
     parser par = parser(*toks);
     ast_node_t tree = par.parse();
 
-    interpreter inter = interpreter(mode);
     inter_ret_state_t state;
     inter_info_t info;
     ast_node_t evaled = inter.inter(tree, state, UINT64_MAX, info);
 
     delete toks;
-    ast_traits::free(tree);
     return evaled_exp(state, in, evaled, info);
 }
+
+void line_interpreter::sigint_handler(int)
+{
+    inter.cancel_calculation();
+}
+
+line_interpreter::~line_interpreter()
+{ }

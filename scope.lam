@@ -1,42 +1,61 @@
 let id   = \x.x in
-let true  = \x.\y. x in
-let false = \x.\y. y in
+let true  = \x y. x in
+let false = \x y. y in
 
-let zero = \f.\x. x in
-let one  = \f.\x. f x in
-let two  = \f.\x. f (f x) in
-let three= \f.\x. f (f (f x)) in
-let four = \f.\x. f (f (f (f x))) in
+let zero = \f x. x in
+let one  = \f x. f x in
+let two  = \f x. f (f x) in
+let three= \f x. f (f (f x)) in
+let four = \f x. f (f (f (f x))) in
 
-let J = \f.\x.\y. y f x in
+let J = \f x y. y f x in
+let B = \f x y. f (x y) in
 let Y = \f. (\x. f (x x)) (\x. f (x x)) in
 
-let succ = \n.\f.\x. f (n f x) in
-let pred = \n.\f.\x. n (\g.\h.h (g f)) (\u.x) (\j.j) in
+let succ = \n f x. f (n f x) in
+let pred = \n f x. n (\g h.h (g f)) (\u.x) (\j.j) in
 
 let add  = J succ in
 let sub  = J pred in
-let mul  = \m.\n.\f.m (n f) in
-let pow  = \b.\e. e b in
+let mul  = B in
+let pow  = \b e. e b in
 let sqr  = \x. mul x x in
 
-let and = \x.\y. x y x in
-let or  = \x.\y. x x y in
+let and = \x y. x y x in
+let or  = \x y. x x y in
 let not = \x. x false true in
-let ifte = \b.\i.\e. b i e in
 
 let iszero = \x. x (\z. false) true in
-let eq     = \a.\b. and (iszero (sub a b)) (iszero (sub b a)) in
-let less   = \a.\b. not (iszero (sub b a)) in
-let greater= \a.\b. not (iszero (sub a b)) in
-let leq    = \a.\b. iszero (sub a b) in
-let geq    = \a.\b. iszero (sub b a) in
+let eq     = \a b. and (iszero (sub a b)) (iszero (sub b a)) in
+let less   = \a b. not (iszero (sub b a)) in
+let greater= \a b. not (iszero (sub a b)) in
+let leq    = \a b. iszero (sub a b) in
+let geq    = \a b. iszero (sub b a) in
 
-let fac_helper = \rec.\n. (iszero n) one (mul n (rec (pred n))) in
-let fac = Y fac_helper in
+let fac-helper = \rec n. (iszero n) one (mul n (rec (pred n))) in
+let fac = Y fac-helper in
 
-let fib_helper = \rec.\n. (leq n two) one (add (rec (pred n)) (rec (pred (pred n)))) in
-let fib = Y fib_helper in
+let fib-helper = \rec n. (leq n two) one (add (rec (pred n)) (rec (pred (pred n)))) in
+let fib = Y fib-helper in
 
-let sum_helper = \rec.\n. (iszero n) zero (add n (rec (pred n))) in
-let sum = Y sum_helper in
+let cons = \x y f. f x y in
+let car = \p.p true in
+let cdr = \p.p false in
+let empty = \x. true in
+let isempty = \p.p (\x y. false) in
+
+let len-h = \rec xs. ((isempty xs) zero) (succ (rec (cdr xs))) in
+let len   = Y len-h in
+
+let app-h = \rec xs ys. (isempty xs) ys (cons (car xs) (rec (cdr xs) ys)) in
+let app = Y app-h in
+
+let map-h = \rec f xs. (isempty xs) empty (cons (f (car xs)) (rec f (cdr xs))) in
+let map   = Y map-h in
+
+let list-n-h = \rec n. (iszero n) (cons zero empty) (cons n (rec (red n))) in
+let list-n   = Y list-n-h in
+
+let get = \xs i. car (i cdr xs) in
+
+let l = (cons 0 (cons 1 (cons 2 (cons 3 empty)))) in

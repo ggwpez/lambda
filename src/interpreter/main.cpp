@@ -12,9 +12,9 @@ using namespace std;
 
 __attribute__((noreturn)) void sigsegv_action(int num)
 {
-    std::wcerr << std::endl << L"-- SIGSEGV -- " << std::endl;
+    std::wcerr << std::endl << L"-- SIGSEGV -- " << std::endl << L"Maybe out of stack?" << std::endl;
     signal(num, SIG_DFL);
-    std::exit(EXIT_FAILURE);
+    std::terminate();
 }
 
 void init_stack()
@@ -42,5 +42,6 @@ int main(int argc, char** argv)
     signal(SIGSEGV, sigsegv_action);
 
     line_interpreter inter(argc, argv);
+
     return inter.run();
 }

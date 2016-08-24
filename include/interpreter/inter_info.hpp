@@ -10,19 +10,18 @@ class inter_info_t
 public:
     inter_info_t()
         : alphas(0), betas(0), etas(0), taus(0), nodes(0)
-    {
-        this->clear();
-    }
+    { }
 
     inter_info_t(uint64_t alpha, uint64_t beta, uint64_t eta, uint64_t tau, uint64_t node)
-        : alphas(alpha), betas(beta), etas(eta), taus(tau), nodes(node) { }
+        : alphas(alpha), betas(beta), etas(eta), taus(tau), nodes(node)
+    { }
 
-    inline  void clear()
+    inline void clear()
     {
         std::memset(this, 0, sizeof(*this));
     }
 
-    inter_info_t& operator+=(inter_info_t const& other)
+    inter_info_t& operator +=(inter_info_t const& other)
     {
         this->alphas += other.alphas;
         this->betas  += other.betas;

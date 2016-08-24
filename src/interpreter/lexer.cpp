@@ -89,7 +89,7 @@ tok lexer::lex_var(unsigned const s, unsigned& l)
 {
     l = 0;
 
-    while ((s +l) < input.length() && (std::iswalnum(input[s +l]) || input[s +l] == L'_'))
+    while ((s +l) < input.length() && (std::iswalnum(input[s +l]) || input[s +l] == L'_' || input[s +l] == L'-'))
         l++;
 
     if (!l)

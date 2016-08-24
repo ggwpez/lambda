@@ -4,8 +4,13 @@
 #define CLR L"\033[1;37m"
 #define CLR_END L"\033[0m"
 
-#define outnl(msg) do { std::wcout << L"> " << msg << std::endl; } while (0)
-#define outl(msg) do { std::wcout << CLR << L"> " << msg << CLR_END << std::endl; } while (0)
+#define BANG_IN L"$ "
+#define BANG_OUT L"> "
+#define MSG_B L"\""
+#define MSG_E L"\""
+
+#define outnl(msg) do { std::wcout << BANG_OUT << msg << std::endl; } while (0)
+#define outl(msg) do { std::wcout << CLR << BANG_OUT << msg << CLR_END << std::endl; } while (0)
 
 #define PAD(s) union { char pad[s]; }
 

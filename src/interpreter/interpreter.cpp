@@ -11,6 +11,7 @@ interpreter::interpreter(inter_ops_t ops)
 
 ast_node_t interpreter::inter(ast_node_t& tree, inter_ret_state_t& state, uint64_t steps, inter_info_t& in)
 {
+    cancel = false;
     state = inter_ret_state_t::OK;
     ast_node_t& ret = tree;
     inter_info_t tmp;
@@ -21,25 +22,27 @@ ast_node_t interpreter::inter(ast_node_t& tree, inter_ret_state_t& state, uint64
     if (ast_traits::is_nullptr(tree))
         return ast_node_t();
 
-    ast_node_t nret;
-    while (changed && (sum_steps < steps))
+    while (!cancel && changed && (sum_steps < steps))
     {
-        nret = single_step(ret, changed, &tmp);
+        ast_node_t&& nret(single_step(ret, changed, &tmp));
         in += tmp;
 
         if (! ast_traits::equals(ret, tree))
             ast_traits::free(ret);
 
-        ret = nret;
+        ret = std::move(nret);
         sum_steps++;
     }
 
     if (sum_steps >= steps)
         state = inter_ret_state_t::MAX_SUBST_ITER_REACHED;
+    if (cancel)
+        state = inter_ret_state_t::CANCEL;
+
     return ret;//(ast_traits::equals(ret, tree) ? ast_traits::alloc(tree) : ret);
 }
 
-ast_node_t interpreter::single_step(ast_node_t& tree, bool& changed, inter_info_t *info)
+ast_node_t interpreter::single_step(ast_node_t& tree, bool& changed, inter_info_t* info)
 {
     if (ast_traits::is_nullptr(tree))
         return ast_node_t();
@@ -48,13 +51,11 @@ ast_node_t interpreter::single_step(ast_node_t& tree, bool& changed, inter_info_
     int oz = z;
     ast_node_t ret;
 
-    bool beta = is_beta_reducable(tree);
-    bool eta  = is_eta_reducable(tree);
     changed = true;
 
-    if (beta)
+    if (is_beta_reducable(tree))
         ret = beta_red(tree);
-    else if (eta)
+    else if (is_eta_reducable(tree))
         ret = eta_red(tree);
     else
     {
@@ -67,15 +68,20 @@ ast_node_t interpreter::single_step(ast_node_t& tree, bool& changed, inter_info_
     return ret;
 }
 
-ast_node_t interpreter::alpha_red(ast_node_t& E, var_t v, ast_node_t& N)
+void interpreter::cancel_calculation()
 {
-    if (is_term_closed(E))
-        return E;
+    this->cancel = true;
+}
+
+ast_node_t interpreter::alpha_red(ast_node_t& E, var_t& v, ast_node_t& N)
+{
+    //if (is_term_closed(E))
+      //  return E;
 
     alphas++;
     if (E->type == astt::VAR)
     {
-        var_t var = E->var;
+        var_t& var = E->var;
 
         if (var == v)
             return ast_traits::alloc(N);            //+++
@@ -96,13 +102,13 @@ ast_node_t interpreter::alpha_red(ast_node_t& E, var_t v, ast_node_t& N)
     }
     else if (E->type == astt::ABS)
     {
-        var_t x = E->c1->var;
+        var_t& x = E->c1->var;
 
         if (x == v)
             return E;    //###
         else
         {
-            if (is_free_in(N, x))
+            if (is_not_free_in(N, x))
             {
                 /*ast_node_t ny = ast_traits::alloc(E->c1);     //+++
                 ast_node_t c2 = alpha_red(E->c2, v, N);
@@ -115,7 +121,7 @@ ast_node_t interpreter::alpha_red(ast_node_t& E, var_t v, ast_node_t& N)
             }
             else
             {
-                ast_node_t var_z = ast_traits::alloc(get_z());
+                ast_node_t var_z = ast_traits::alloc(get_tmp());
 
                 /*ast_node_t c2_o = alpha_red(E->c2, x, var_z);     //+++
                 ast_node_t c2_n = alpha_red(c2_o, v, N);*/
@@ -171,8 +177,8 @@ ast_node_t interpreter::beta_red(ast_node_t& tree)
     {
         if (tree->c1->type == astt::ABS)        //lambda term gets called
         {
-            ast_node_t lambda = tree->c1;
-            var_t abst_var = lambda->c1->var;
+            ast_node_t& lambda = tree->c1;
+            var_t& abst_var = lambda->c1->var;
 
             return alpha_red(lambda->c2, abst_var, tree->c2);
         }
@@ -205,13 +211,13 @@ bool interpreter::is_eta_reducable(ast_node_t const& tree)
             tree->c2->c2->type == astt::VAR &&
             tree->c2->c2->var == tree->c1->var)
         {
-            return is_free_in(tree->c2->c1, tree->c1->var);
+            return is_not_free_in(tree->c2->c1, tree->c1->var);
         }
         else
             return is_eta_reducable(tree->c2);
     }
     else
-        std::exit(1);
+        std::terminate();
 }
 
 ast_node_t interpreter::eta_red(ast_node_t& tree)
@@ -243,54 +249,52 @@ bool interpreter::is_term_closed(ast_node_t const& tree)
 {
     //return FV(tree).empty();
 
-    std::set<var_t> acc;
+    std::unordered_set<var_t> acc;
     return is_term_closed_rec(tree, acc);
 }
 
-bool interpreter::is_term_closed_rec(ast_node_t const& tree, std::set<var_t>& acc)
+bool interpreter::is_term_closed_rec(ast_node_t const& tree, std::unordered_set<var_t>& bound)
 {
     if (tree->type == astt::VAR)
-        return acc.count(tree->var);
+        return bound.count(tree->var);
     else if (tree->type == astt::APP)
     {
-        if (! is_term_closed_rec(tree->c1, acc))
+        if (! is_term_closed_rec(tree->c1, bound))
             return false;
         else
-            return is_term_closed_rec(tree->c2, acc);
+            return is_term_closed_rec(tree->c2, bound);
     }
     else//if (tree->type == astt::ABS)      //its a lambda
     {
-        var_t abst_var = tree->c1->var;
-        bool is_in = acc.count(abst_var);
+        var_t& abst_var = tree->c1->var;
+        bool is_in = bound.count(abst_var);
         if (! is_in)
-            acc.insert(abst_var);
+            bound.insert(abst_var);
 
-        bool ret = is_term_closed_rec(tree->c2, acc);
+        bool ret = is_term_closed_rec(tree->c2, bound);
 
         if (! is_in)
-            acc.erase(abst_var);
+            bound.erase(abst_var);
         return ret;
     }
 }
 
-bool interpreter::is_free_in(ast_node_t const& tree, var_t &x)
+bool interpreter::is_not_free_in(ast_node_t const& tree, var_t& x)
 {
     if (tree->type == astt::VAR)
-        return true;
+        return (tree->var != x);
     else if (tree->type == astt::APP)
-    {
-        return is_free_in(tree->c1, x) || is_free_in(tree->c2, x);
-    }
+        return is_not_free_in(tree->c1, x) && is_not_free_in(tree->c2, x);
     else
     {
         if (tree->c1->var == x)
-            return false;
+            return true;
 
-        return is_free_in(tree->c2, x);
+        return is_not_free_in(tree->c2, x);
     }
 }
 
-std::set<var_t> interpreter::FV(ast_node_t const& tree)
+/*std::set<var_t> interpreter::FV(ast_node_t const& tree)
 {
     std::set<var_t> ret;
 
@@ -317,9 +321,14 @@ void interpreter::FV_rec(ast_node_t const& tree, std::set<var_t>& acc)
         if (! is_in)
             acc.erase(abst_var);
     }
+}*/
+
+void interpreter::set_mode(inter_ops_t new_op)
+{
+    this->op = new_op;
 }
 
-inline var_t interpreter::get_z()
+inline var_t interpreter::get_tmp()
 {
     return std::wstring(1, L'τ') +std::to_wstring(z++);
 }

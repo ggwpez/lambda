@@ -10,7 +10,8 @@ class lexer
 {
 public:
     lexer(std::wstring const& in)
-        : input(in) {}
+        : input(in)
+    { }
 
     std::vector<tok>* lex();
 

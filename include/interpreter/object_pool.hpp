@@ -44,8 +44,7 @@ public:
         if (it == START)
             re_alloc();
 
-        T* ret = new (addr) T(std::forward<args>(a)...);
-        return ret;
+        return new (addr) T(std::forward<args>(a)...);
     }
 
     inline void destroy(T* obj)

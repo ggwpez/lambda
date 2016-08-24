@@ -10,7 +10,7 @@ QMAKE_CXXFLAGS_WARN_ON = -Werror -Wall -pedantic  \
     -Wlong-long -Wmissing-braces \
     -Wmissing-field-initializers -Wmissing-format-attribute   \
     -Wmissing-include-dirs -Wmissing-noreturn \
-    -Wpacked  -Wpadded -Wparentheses  -Wpointer-arith \
+    -Wpacked -Wparentheses  -Wpointer-arith \
     -Wredundant-decls -Wreturn-type \
     -Wsequence-point  -Wshadow -Wsign-compare  -Wstack-protector \
     -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
@@ -18,4 +18,4 @@ QMAKE_CXXFLAGS_WARN_ON = -Werror -Wall -pedantic  \
     -Wunknown-pragmas  -Wunreachable-code -Wunused \
     -Wunused-function  -Wunused-label  -Wunused-parameter \
     -Wunused-value  -Wunused-variable  -Wvariadic-macros \
-    -Wvolatile-register-var -Wwrite-strings #-Waggregate-return -Weffc++
+    -Wvolatile-register-var -Wwrite-strings #-Weffc++ #-Waggregate-return  -Wpadded

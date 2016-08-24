@@ -9,18 +9,18 @@
 #include <vector>
 #include <string>
 #include <array>
-
 #include <traits_allocator.hpp>
-
 
 class line_interpreter
 {
 public:
     line_interpreter(int argc, char** argv);
+    ~line_interpreter();
 
     int run();
     void print(std::vector<evaled_exp> const& exps, bool supp_in_print);
 
+    void sigint_handler(int);
     void set_scope_file(const std::wstring &file);
     int interpret_command(const std::wstring &cmd);
     std::vector<evaled_exp> interpret_file(const std::wstring &file);
@@ -29,9 +29,12 @@ public:
 
     void doit(evaled_exp &ret, std::wstring& input);
 
-    inter_ops_t mode;
-    PAD(4);
     std::wstring scope;
+
+private:
+    interpreter inter;
+    bool enable_trace = false;
+    PAD(7);
 };
 
 #endif // LINE_INTERPRETER_HPP

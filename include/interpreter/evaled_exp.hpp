@@ -11,10 +11,13 @@
 struct evaled_exp
 {
     evaled_exp()
-        : state(inter_ret_state_t::ERR), input(), tree(), info() { }
+        : state(inter_ret_state_t::ERR), input(), tree(), info()
+    { }
     evaled_exp(inter_ret_state_t s, std::wstring in, ast_node_t& t, const inter_info_t &i)
-        : state(s), input(in), tree(t), info(i) { }
-    ~evaled_exp() { }
+        : state(s), input(in), tree(t), info(i)
+    { }
+    ~evaled_exp()
+    { }
 
     inter_ret_state_t state;
     PAD(4);

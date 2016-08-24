@@ -14,6 +14,8 @@ public:
     static const char*  get_c (const wchar_t* c);
     static int read_file(const char *path, std::wstringstream &str);
     static wchar_t const* read_file(const char *path);
+
+    static std::wstring get_line();
 };
 
 #endif // IO_H

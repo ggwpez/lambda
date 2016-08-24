@@ -1,5 +1,5 @@
 include(../configure.pri)
-include(../warnings.pri)
+#include(../warnings.pri)
 
 QT -= gui core
 
@@ -8,6 +8,7 @@ CONFIG += console
 CONFIG -= app_bundle
 
 TEMPLATE = app
+LIBS += -lreadline
 
 INCLUDEPATH += ../../include/interpreter/
 
@@ -22,7 +23,8 @@ SOURCES += \
     ../../src/interpreter/parser.cpp \
     ../../src/interpreter/split_string.cpp \
     ../../src/interpreter/tok.cpp \
-    ../../src/interpreter/traits_allocator.cpp
+    ../../src/interpreter/traits_allocator.cpp \
+    ../../src/interpreter/scope.cpp
 
 HEADERS += \
     ../../include/interpreter/ast.hpp \
@@ -37,5 +39,6 @@ HEADERS += \
     ../../include/interpreter/parser.hpp \
     ../../include/interpreter/split_string.hpp \
     ../../include/interpreter/tok.hpp \
-    ../../include/interpreter/traits_allocator.hpp
+    ../../include/interpreter/traits_allocator.hpp \
+    ../../include/interpreter/scope.hpp
 

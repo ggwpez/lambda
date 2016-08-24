@@ -5,6 +5,8 @@
 #include <sstream>
 #include <algorithm>
 
+#include <readline/readline.h>
+
 io::io()
 {
 }
@@ -97,4 +99,16 @@ wchar_t const* io::read_file(char const* path)
     delete[] buf;
 
     return ret;
+}
+
+std::wstring io::get_line()
+{
+    char* line = readline("");
+    wchar_t const* wline = get_wc(line);
+
+    std::wstring ret(wline);
+    delete[] wline;
+    std::free(line);
+
+    return std::move(ret);
 }

@@ -23,7 +23,7 @@ ast_node_t parser::parse()
     }
     catch (std::wstring const& str)
     {
-        std::wcerr << L"Cought parsing error: " << str << std::endl;
+        std::wcerr << L"Caught Exception: " << str << std::endl;
         return ast_node_t();
     }
     catch (...)
@@ -102,16 +102,38 @@ ast_node_t parser::parse_par(unsigned const s, unsigned& l)
     return ret;
 }
 
+// lambda
 ast_node_t parser::parse_abs(unsigned const s, unsigned& l)
 {
-    unsigned var_l = 0, exp_l = 0;
+    unsigned abs_l = 0;
 
-    assert(toks[s], tokt::LAM);                 l = 1;
-    ast_node_t var = parse_var(s +l, var_l);    l += var_l;
-    assert(toks[s +l], tokt::DOT);              l++;
-    ast_node_t exp = parse_exp(s +l, exp_l);    l += exp_l;
+    assert(toks[s], tokt::LAM);                     l = 1;
+    ast_node_t abs = parse_abs_rest(s +l, abs_l);   l += abs_l;
 
-    return ast_traits::alloc(astt::ABS, var, exp);
+    return abs;
+}
+
+ast_node_t parser::parse_abs_rest(unsigned const s, unsigned& l)
+{
+    unsigned var_l = 0;
+    ast_node_t var = parse_var(s, var_l);           l += var_l;
+
+    // is it an abstraction with multiple bound variabled, aka. '\x y.' ?
+    if (toks[s +l].type == tokt::VAR)
+    {
+        unsigned abs_l = 0;
+        ast_node_t abs = parse_abs_rest(s +l, abs_l); l += abs_l;
+
+        return ast_traits::alloc(astt::ABS, var, abs);
+    }
+    else
+    {
+        unsigned exp_l = 0;
+        assert(toks[s +l], tokt::DOT);              l++;
+        ast_node_t exp = parse_exp(s +l, exp_l);    l += exp_l;
+
+        return ast_traits::alloc(astt::ABS, var, exp);
+    }
 }
 
 ast_node_t parser::parse_var(unsigned const s, unsigned& l)

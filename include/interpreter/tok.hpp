@@ -27,11 +27,14 @@ extern wchar_t const* const tokt_strings[];
 struct tok
 {
     tok(tokt t)
-        : type(t), num(), var() {}
+        : type(t), num(), var()
+    { }
     tok(std::wstring const& v)
-        : type(tokt::VAR), num(), var(v) {}
+        : type(tokt::VAR), num(), var(v)
+    { }
     tok(unsigned long n)
-        : type(tokt::NUM), num(n), var() {}
+        : type(tokt::NUM), num(n), var()
+    { }
 
     std::wstring to_str() const;
 
