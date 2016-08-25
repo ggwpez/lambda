@@ -36,9 +36,9 @@ public:
     void cancel_calculation();
     void set_mode(inter_ops_t new_op);
 
-    ast_node_t alpha_red(ast_node_t& E, var_t& v, ast_node_t& N);
-    ast_node_t beta_red(ast_node_t& tree);
-    ast_node_t eta_red(ast_node_t& tree);
+    void alpha_red(ast_node_t &E, var_t& v, ast_node_t &N);
+    void beta_red(ast_node_t& tree);
+    void eta_red(ast_node_t& tree);
 
     bool is_beta_reducable(ast_node_t const& tree);
     bool is_eta_reducable(ast_node_t const& tree);

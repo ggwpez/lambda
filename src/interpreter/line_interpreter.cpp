@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <csignal>
 
-#define TEST 0
+#define TEST 1
 
 line_interpreter* ptr = nullptr;
 static void sigint_action(int signum)

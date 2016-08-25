@@ -16,7 +16,7 @@ enum class astt : unsigned
 };
 
 class ast;
-typedef std::shared_ptr<ast> ast_node_t;
+typedef /*std::shared_ptr<ast>*/ast* ast_node_t;
 
 struct ast : std::enable_shared_from_this<ast>
 {

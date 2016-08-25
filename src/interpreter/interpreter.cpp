@@ -49,23 +49,25 @@ ast_node_t interpreter::single_step(ast_node_t& tree, bool& changed, inter_info_
 
     alphas = betas = etas = mallocs = 0;
     int oz = z;
-    ast_node_t ret;
 
     changed = true;
 
     if (is_beta_reducable(tree))
-        ret = beta_red(tree);
+    {
+        beta_red(tree);
+    }
     else if (is_eta_reducable(tree))
-        ret = eta_red(tree);
+    {
+       eta_red(tree);
+    }
     else
     {
         changed = false;
-        ret = tree;
     }
 
     if (info)
         *info = inter_info_t(alphas, betas, etas, z -oz, tree->get_node_count());
-    return ret;
+    return tree;
 }
 
 void interpreter::cancel_calculation()
@@ -73,72 +75,47 @@ void interpreter::cancel_calculation()
     this->cancel = true;
 }
 
-ast_node_t interpreter::alpha_red(ast_node_t& E, var_t& v, ast_node_t& N)
+void interpreter::alpha_red(ast_node_t& E, var_t& v, ast_node_t& N)
 {
-    //if (is_term_closed(E))
-      //  return E;
-
     alphas++;
     if (E->type == astt::VAR)
     {
         var_t& var = E->var;
 
         if (var == v)
-            return ast_traits::alloc(N);            //+++
+            E = ast_traits::alloc(N);
         else
-            return E;    //###
+            return;    //###
     }
     else if (E->type == astt::APP)
     {
-        /*ast_node_t c1 = alpha_red(E->c1, v, N);           //+++
-        ast_node_t c2 = alpha_red(E->c2, v, N);
-
-        return ast_traits::alloc(astt::APP, c1, c2);*/
-
-        E->c1 = alpha_red(E->c1, v, N);
-        E->c2 = alpha_red(E->c2, v, N);
-
-        return E;
+        alpha_red(E->c1, v, N);
+        alpha_red(E->c2, v, N);
     }
     else if (E->type == astt::ABS)
     {
         var_t& x = E->c1->var;
 
         if (x == v)
-            return E;    //###
+        {  }
         else
         {
             if (is_not_free_in(N, x))
             {
-                /*ast_node_t ny = ast_traits::alloc(E->c1);     //+++
-                ast_node_t c2 = alpha_red(E->c2, v, N);
-
-                return ast_traits::alloc(astt::ABS, ny, c2);*/
-
-                E->c2 = alpha_red(E->c2, v, N);
-
-                return E;
+                alpha_red(E->c2, v, N);
             }
             else
             {
                 ast_node_t var_z = ast_traits::alloc(get_tmp());
 
-                /*ast_node_t c2_o = alpha_red(E->c2, x, var_z);     //+++
-                ast_node_t c2_n = alpha_red(c2_o, v, N);*/
-
                 E->c1 = var_z;
-                E->c2 = alpha_red(E->c2, x, var_z);
-                E->c2 = alpha_red(E->c2, v, N);
-
-                //ast_traits::free(var_z); //c2_o ###
-
-                //return ast_traits::alloc(astt::ABS, var_z, c2_n);
-                return E;
+                alpha_red(E->c2, x, var_z);
+                alpha_red(E->c2, v, N);
             }
         }
     }
 
-    return nullptr;
+    return;
 }
 
 bool interpreter::is_beta_reducable(ast_node_t const& tree)
@@ -156,22 +133,14 @@ bool interpreter::is_beta_reducable(ast_node_t const& tree)
         return false;
 }
 
-ast_node_t interpreter::beta_red(ast_node_t& tree)
+void interpreter::beta_red(ast_node_t& tree)
 {
-    ast_node_t ret = nullptr;
-
     betas++;
     if (tree->type == astt::VAR)
-        ret = tree;  //###
+    {  }
     else if (tree->type == astt::ABS)
     {
-        /*ast_node_t c1 = ast_traits::alloc(tree->c1);      //+++
-        ast_node_t c2 = beta_red(tree->c2);
-
-        return ast_traits::alloc(astt::ABS, c1, c2);*/
-
-        tree->c2 = beta_red(tree->c2);
-        return tree;
+        beta_red(tree->c2);
     }
     else if (tree->type == astt::APP)
     {
@@ -180,23 +149,20 @@ ast_node_t interpreter::beta_red(ast_node_t& tree)
             ast_node_t& lambda = tree->c1;
             var_t& abst_var = lambda->c1->var;
 
-            return alpha_red(lambda->c2, abst_var, tree->c2);
+            alpha_red(lambda->c2, abst_var, tree->c2);
+
+            tree = lambda->c2;      // CARE ###
         }
         else
         {
-            /*ast_node_t func = beta_red(tree->c1);     //+++
-            ast_node_t arg = !((int)this->op & (int)inter_ops_t::LAZY) ? beta_red(tree->c2) : ast_traits::alloc(tree->c2);
+            beta_red(tree->c1);
 
-            return ast_traits::alloc(astt::APP, func, arg);*/
-
-            tree->c1 = beta_red(tree->c1);
-            tree->c2 = !((int)this->op & (int)inter_ops_t::LAZY) ? beta_red(tree->c2) : tree->c2;
-
-            return tree;
+            if (!((int)this->op & (int)inter_ops_t::LAZY))
+                beta_red(tree->c2);
         }
     }
-
-    return ret;
+    else
+        std::terminate();
 }
 
 bool interpreter::is_eta_reducable(ast_node_t const& tree)
@@ -220,29 +186,41 @@ bool interpreter::is_eta_reducable(ast_node_t const& tree)
         std::terminate();
 }
 
-ast_node_t interpreter::eta_red(ast_node_t& tree)
+void interpreter::eta_red(ast_node_t& tree)
 {
     //if (! is_eta_reducable(tree))       //TODO: check speed
       //  return tree;
 
     etas++;
     if (tree->type == astt::VAR)
-        return tree;     //###
+        return;     //###
     else if (tree->type == astt::APP)
-        return ast_traits::alloc(astt::APP, eta_red(tree->c1), eta_red(tree->c2));
+    {
+        eta_red(tree->c1);
+        eta_red(tree->c2);
+
+        tree = ast_traits::alloc(astt::APP, tree->c1, tree->c2);
+    }
     else if (tree->type == astt::ABS)
     {
         if (tree->c2->type == astt::APP &&
             tree->c2->c2->type == astt::VAR &&
             tree->c2->c2->var == tree->c1->var)
         {
-            return ast_traits::alloc(tree->c2->c1);
+            tree = ast_traits::alloc(tree->c2->c1);
         }
         else
-            return ast_traits::alloc(astt::ABS, eta_red(tree->c1), eta_red(tree->c2));
+        {
+            eta_red(tree->c1);
+            eta_red(tree->c2);
+
+            tree = ast_traits::alloc(astt::ABS, tree->c1, tree->c2);
+        }
     }
     else
-        return nullptr;
+    {
+        std::terminate();
+    }
 }
 
 bool interpreter::is_term_closed(ast_node_t const& tree)
