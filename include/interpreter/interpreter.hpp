@@ -4,58 +4,50 @@
 #include <cstdint>
 #include <vector>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "inter_info.hpp"
 #include "scope.hpp"
 #include "ast.hpp"
 
+#define MAX_STEPS (1ull << 32)
+
 enum class inter_ops_t : unsigned
 {
-    NONE = 0,
-    DEFAULT = 8,
-    TRACE = 1,
-    TRACE_ALL = 2,
-    LAZY = 4,
-    AUTO_REP_ON_OV = 8,
+	NONE = 0,
+	DEFAULT = 8,
+	TRACE = 1,
+	TRACE_ALL = 2,
+	LAZY = 4,
+	AUTO_REP_ON_OV = 8,
 };
 
 enum class inter_ret_state_t : unsigned
 {
-    OK = 0,
-    MAX_SUBST_ITER_REACHED,
-    CANCEL,
-    ERR
+	OK = 0,
+	TIMEOUT,
+	CANCEL,
+	ERR
 };
 
 class interpreter
 {
 public:
-    interpreter(inter_ops_t ops = inter_ops_t::DEFAULT);
-    ast_node_t inter(ast_node_t &tree, inter_ret_state_t& state, uint64_t steps, inter_info_t &in);
-    ast_node_t single_step(ast_node_t &tree, bool &changed, inter_info_t* info);
-    void cancel_calculation();
-    void set_mode(inter_ops_t new_op);
+	interpreter(inter_ops_t ops = inter_ops_t::DEFAULT);
 
-    void alpha_red(ast_node_t &E, var_t& v, ast_node_t &N);
-    void beta_red(ast_node_t& tree);
-    void eta_red(ast_node_t& tree);
+	inter_ret_state_t inter(ast_node_t& tree, inter_info_t& info);
+	bool eval(ast_node_t& tree);
+	void free_change(ast_node_t& tree, int dir, int rec);
+	void substitute_and_dec_free(ast_node_t& M, ast_node_t const& N, int rec, int abs);
+	bool is_bound_in(ast_node_t const& tree, var_t var);
 
-    bool is_beta_reducable(ast_node_t const& tree);
-    bool is_eta_reducable(ast_node_t const& tree);
+	void cancel_calculation();
+	void set_mode(inter_ops_t new_op);
 
-    bool is_term_closed(ast_node_t const& tree);
-    bool is_term_closed_rec(ast_node_t const& tree, std::unordered_set<var_t>& bound);
+	inter_ops_t op;
 
-    bool is_not_free_in(ast_node_t const& tree, var_t& x);
-
-    std::unordered_set<var_t> FV(ast_node_t const& tree);
-    void FV_rec(ast_node_t const& tree, std::unordered_set<var_t>& acc);
-
-    var_t get_tmp();
-    inter_ops_t op;
-
-    unsigned z, alphas, betas, etas;
-    bool cancel = false;
+	std::uint64_t betas, etas, steps;
+	bool cancel = false;
 };
 
 #endif // INTERPRETER_HPP

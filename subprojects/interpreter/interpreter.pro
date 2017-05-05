@@ -5,7 +5,7 @@ QT -= gui core
 
 TARGET = interpreter
 CONFIG += console
-CONFIG -= app_bundle
+CONFIG -= app_bundle c++11 C++11
 
 TEMPLATE = app
 LIBS += -lreadline

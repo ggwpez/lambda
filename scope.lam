@@ -2,23 +2,23 @@ let id   = \x.x in
 let true  = \x y. x in
 let false = \x y. y in
 
-let zero = \f x. x in
-let one  = \f x. f x in
+let zero = \f x. x in		{ Is in fact (\f . id) }
+let one  = \f x. f x in		{ Is eta-equivalent to (\f . f) aka. id }
 let two  = \f x. f (f x) in
 let three= \f x. f (f (f x)) in
 let four = \f x. f (f (f (f x))) in
 
-let J = \f x y. y f x in
-let B = \f x y. f (x y) in
+let J = \f x y. y f x in	{ Applies f y-times to x }
+let B = \f x y. f (x y) in	{ Just the function composition for two functions. }
 let Y = \f. (\x. f (x x)) (\x. f (x x)) in
 
 let succ = \n f x. f (n f x) in
 let pred = \n f x. n (\g h.h (g f)) (\u.x) (\j.j) in
 
-let add  = J succ in
-let sub  = J pred in
-let mul  = B in
-let pow  = \b e. e b in
+let add  = (\m n f x. m f (n f x)) in 		{ Alternative: (J succ) }
+let sub  = (J pred) in
+let mul  = (\m n f. m (n f)) in				{ Is just the function composition (B). Thats also why '1' is the id function. Alternative: (\x. J (add x) zero) }
+let pow  = \b e. e b in						{ Alternative: (\x. J (mul x) one) }
 let sqr  = \x. mul x x in
 
 let and = \x y. x y x in
@@ -32,7 +32,7 @@ let greater= \a b. not (iszero (sub a b)) in
 let leq    = \a b. iszero (sub a b) in
 let geq    = \a b. iszero (sub b a) in
 
-let fac-helper = \rec n. (iszero n) one (mul n (rec (pred n))) in
+let fac-helper = (\g. \x. (\n. n (\x. (\x. \y. y)) (\x. \y. x)) x 1 ((\m. \n. \f. m (n f)) x (g ((\n. \f. \x. n (\g. \h. h (g f)) (\u. x) (\u. u)) x)))) in { \rec n. (iszero n) one (mul n (rec (pred n))) in }
 let fac = Y fac-helper in
 
 let fib-helper = \rec n. (leq n two) one (add (rec (pred n)) (rec (pred (pred n)))) in
@@ -47,15 +47,20 @@ let isempty = \p.p (\x y. false) in
 let len-h = \rec xs. ((isempty xs) zero) (succ (rec (cdr xs))) in
 let len   = Y len-h in
 
-let app-h = \rec xs ys. (isempty xs) ys (cons (car xs) (rec (cdr xs) ys)) in
-let app = Y app-h in
-
 let map-h = \rec f xs. (isempty xs) empty (cons (f (car xs)) (rec f (cdr xs))) in
 let map   = Y map-h in
 
-let list-n-h = \rec n. (iszero n) (cons zero empty) (cons n (rec (red n))) in
+let list-n-h = \rec n. (iszero n) (cons zero empty) (cons n (rec (pred n))) in
 let list-n   = Y list-n-h in
+
+let append-h = \rec xs ys. (isempty xs) ys (cons (car xs) (rec (cdr xs) ys)) in
+let append = Y append-h in
+
+let reverse-h = \rec xs. (isempty xs) empty (append (rec (cdr xs)) (cons (car xs) empty)) in
+let reverse = Y reverse-h in
 
 let get = \xs i. car (i cdr xs) in
 
-let l = (cons 0 (cons 1 (cons 2 (cons 3 empty)))) in
+let bluff = \f x. true in
+let is_bluff = \c. c (\x. false) false in
+let beq = \x y. (is_bluff x) ((is_bluff y) false true) ((is_bluff y) true (eq x y)) in

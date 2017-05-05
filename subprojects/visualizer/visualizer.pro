@@ -13,23 +13,24 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = visualizer
 TEMPLATE = app
+QMAKE_LIBS +=-lreadline
 
 INCLUDEPATH += ../../include/visualizer/ ../../include/interpreter/
 
 SOURCES += \
-    ../../src/visualizer/infoform.cpp \
-    ../../src/visualizer/main.cpp \
-    ../../src/visualizer/mainwindow.cpp \
-    ../../src/visualizer/qcustomplot.cpp
+	../../src/visualizer/infoform.cpp \
+	../../src/visualizer/main.cpp \
+	../../src/visualizer/mainwindow.cpp \
+	../../src/visualizer/qcustomplot.cpp
 
 HEADERS += \
-    ../../include/visualizer/infoform.hpp \
-    ../../include/visualizer/mainwindow.hpp \
-    ../../include/visualizer/qcustomplot.hpp
+	../../include/visualizer/infoform.hpp \
+	../../include/visualizer/mainwindow.hpp \
+	../../include/visualizer/qcustomplot.hpp
 
 FORMS += \
-    ../../src/visualizer/infoform.ui \
-    ../../src/visualizer/mainwindow.ui
+	../../src/visualizer/infoform.ui \
+	../../src/visualizer/mainwindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../interpreter_lib/release/ -linterpreter_lib
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../interpreter_lib/debug/ -linterpreter_lib

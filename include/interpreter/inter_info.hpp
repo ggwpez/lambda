@@ -8,38 +8,37 @@
 class inter_info_t
 {
 public:
-    inter_info_t()
-        : alphas(0), betas(0), etas(0), taus(0), nodes(0)
-    { }
+	inter_info_t()
+		: betas(0), etas(0), steps(0), nodes(0)
+	{ }
 
-    inter_info_t(uint64_t alpha, uint64_t beta, uint64_t eta, uint64_t tau, uint64_t node)
-        : alphas(alpha), betas(beta), etas(eta), taus(tau), nodes(node)
-    { }
+	inter_info_t(uint64_t beta, uint64_t eta, uint64_t steps, uint64_t node)
+		: betas(beta), etas(eta), steps(steps), nodes(node)
+	{ }
 
-    inline void clear()
-    {
-        std::memset(this, 0, sizeof(*this));
-    }
+	inline void clear()
+	{
+		std::memset(this, 0, sizeof(*this));
+	}
 
-    inter_info_t& operator +=(inter_info_t const& other)
-    {
-        this->alphas += other.alphas;
-        this->betas  += other.betas;
-        this->etas   += other.etas;
-        this->taus   += other.taus;
-        this->nodes  += other.nodes;
+	inter_info_t& operator +=(inter_info_t const& other)
+	{
+		this->betas  += other.betas;
+		this->etas   += other.etas;
+		this->steps  += other.steps;
+		this->nodes  += other.nodes;
 
-        return *this;
-    }
+		return *this;
+	}
 
-    std::wstring to_str() const
-    {
-        return L"Alphas: " +std::to_wstring(alphas) + L" Betas: " +std::to_wstring(betas)
-              +L" Etas: "  +std::to_wstring(etas  ) + L" Taus: "  +std::to_wstring(taus)
-              +L" Nodes: " +std::to_wstring(nodes );
-    }
+	std::wstring to_str() const
+	{
+		return L" Betas: " +std::to_wstring(betas)
+			  +L" Etas: "  +std::to_wstring(etas ) + L" Steps: "  +std::to_wstring(steps)
+			  +L" Nodes: " +std::to_wstring(nodes);
+	}
 
-    uint64_t alphas, betas, etas, taus, nodes;
+	std::uint64_t betas, etas, steps, nodes;
 };
 
 #endif // INTER_INFO
