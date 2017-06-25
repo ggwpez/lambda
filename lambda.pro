@@ -1,7 +1,8 @@
 TEMPLATE = subdirs
 CONFIG -=c++11
 
-QMAKE_CXXFLAGS +=-fopenmp -std=c++17 -g3
+# sudo apt-get install libreadline6 libreadline6-dev
+QMAKE_CXXFLAGS +=-fopenmp -std=c++17
 QMAKE_LIBS +=-lgomp
 
 SUBDIRS += \

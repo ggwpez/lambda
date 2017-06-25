@@ -8,8 +8,6 @@
 
 #define STACK_SIZE_MB 32
 
-using namespace std;
-
 __attribute__((noreturn)) void sigsegv_action(int num)
 {
 	std::wcerr << std::endl << L"-- SIGSEGV -- " << std::endl << L"Maybe out of stack?" << std::endl;

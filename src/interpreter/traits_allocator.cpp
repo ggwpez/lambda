@@ -1,3 +1,3 @@
-#include <traits_allocator.hpp>
+#include "traits_allocator.hpp"
 
-object_pool<ast, POOL_SIZE> pool = object_pool<ast, POOL_SIZE>();
+pool<ast, POOL_SIZE> global_pool = pool<ast, POOL_SIZE>();

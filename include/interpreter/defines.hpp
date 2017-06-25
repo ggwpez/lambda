@@ -10,9 +10,9 @@
 #define MSG_E L"\""
 
 #define outnl(msg) do { std::wcout << BANG_OUT << msg << std::endl; } while (0)
-#define outl(msg) do { std::wcout << CLR << BANG_OUT << msg << CLR_END << std::endl; } while (0)
+#define outl(msg) do { std::wcout << BANG_OUT << CLR << msg << CLR_END << std::endl; } while (0)
 
-#define PAD(s) union { char pad[s]; }
+#define PAD(s) struct { char pads[s]; }
 
 /*
  * Set to true, if you want to use threads, but the boost::object_pool isnt thread safe, so it uses

@@ -75,6 +75,11 @@ ast_node_t parser::parse()
 		std::wcerr << L"Caught Exception: " << str << std::endl;
 		return ast_node_t();
 	}
+	catch (std::exception const& e)
+	{
+		std::wcerr << L"Caught Exception: " << e.what() << std::endl;
+		return ast_node_t();
+	}
 	catch (...)
 	{
 		std::wcerr << L"Internal parser exception." << std::endl;

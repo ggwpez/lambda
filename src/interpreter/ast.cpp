@@ -3,10 +3,8 @@
 #include <unordered_map>
 
 ast::ast(ast_node_t const& p)
-	: type(p->type), var()
+	: type(p->type)
 {
-	this->type = p->type;
-
 	if (p->type == astt::VAR)
 		this->var = p->var;
 	else if (p->type == astt::ABS || p->type == astt::APP)
@@ -25,14 +23,15 @@ ast::ast(ast_node_t&& p)
 		this->var = std::move(p->var);
 	else if (p->type == astt::ABS || p->type == astt::APP)
 	{
-		this->c1 = std::move(p->c1);
+		if (p->type == astt::APP)
+			this->c1 = std::move(p->c1);
 		this->c2 = std::move(p->c2);
 	}
 }
 
 ast::~ast()
 {
-	if (this->type == astt::ABS && this->c2)
+	if (this->type == astt::ABS && c2)
 		ast_traits::free(c2);
 	else if (this->type == astt::APP)
 	{
@@ -62,7 +61,7 @@ std::wstring var_name(int h)
 void ast::to_str_rec(std::wostringstream& ss, bool place_bracket, int rec) const
 {
 	if (type == astt::VAR)
-		ss <<var;
+		ss << var;
 	else
 	{
 		if (place_bracket)

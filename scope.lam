@@ -60,7 +60,4 @@ let reverse-h = \rec xs. (isempty xs) empty (append (rec (cdr xs)) (cons (car xs
 let reverse = Y reverse-h in
 
 let get = \xs i. car (i cdr xs) in
-
-let bluff = \f x. true in
-let is_bluff = \c. c (\x. false) false in
-let beq = \x y. (is_bluff x) ((is_bluff y) false true) ((is_bluff y) true (eq x y)) in
+let l = (cons 0 (cons 1 (cons 2 (cons 3 empty)))) in

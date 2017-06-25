@@ -8,7 +8,7 @@
 #include <defines.hpp>
 #include <tuple>
 
-enum class astt : unsigned
+enum class astt : uint8_t
 {
 	VAR,
 	ABS,
@@ -18,28 +18,23 @@ enum class astt : unsigned
 class ast;
 typedef ast* ast_node_t;
 
-struct ast : std::enable_shared_from_this<ast>
+struct ast
 {
 	ast()
-		: type(astt::VAR), var(0)
+		: var(0), type(astt::VAR)
 	{ }
 	ast(var_t v)
-		: type(astt::VAR), var(v)
+		: var(v), type(astt::VAR)
 	{ }
 	ast(astt t, ast_node_t const& p2)
-		: type(t), c1(), c2(p2)
+		: c2(p2), c1(), type(t)
 	{ }
 	ast(astt t, ast_node_t const& p1, ast_node_t const& p2)
-		: type(t), c1(p1), c2(p2)
+		: c2(p2), c1(p1), type(t)
 	{ }
 	ast(ast_node_t const& p);
 	ast(ast_node_t&& p);
 	~ast();
-
-	inline std::shared_ptr<ast> getptr()
-	{
-		return shared_from_this();
-	}
 
 	inline std::size_t get_height() const
 	{
@@ -80,15 +75,15 @@ struct ast : std::enable_shared_from_this<ast>
 	}
 	std::wstring to_str() const;
 
-	astt type;
 	union
 	{
 		struct
 		{
-			ast_node_t c1, c2;
+			ast_node_t c2, c1;
 		};
 		var_t var;
 	};
+	astt type;
 
 private:
 	void to_str_rec(std::wostringstream& ss, bool place_bracket, int rec) const;

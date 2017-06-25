@@ -14,7 +14,7 @@ struct evaled_exp
 		: state(inter_ret_state_t::ERR), input(), tree(), info()
 	{ }
 	evaled_exp(inter_ret_state_t s, std::wstring in, ast_node_t& t, const inter_info_t &i)
-		: state(s), input(in), tree(t), info(i)
+		: state(s), input(in), tree(t, &ast_traits::free), info(i)
 	{ }
 	~evaled_exp()
 	{ }
