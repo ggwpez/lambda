@@ -18,7 +18,7 @@ public:
 		: data_ptr(reinterpret_cast<char*>(calloc(count, t_size))), m_free_pos(0)
 	{
 		assert(all_size);
-		std::wclog << L"Pool allocating " << all_size << L" bytes in " << count << L" objects of type " << typeid(T).name() << std::endl;
+		//std::wclog << L"Pool allocating " << all_size << L" bytes in " << count << L" objects of type " << typeid(T).name() << std::endl;
 
 		if (! data_ptr)
 			throw std::bad_alloc();
@@ -33,7 +33,7 @@ public:
 		data_ptr = nullptr;
 
 		if (m_free_pos)
-			std::wcerr << L"Warning " << m_free_pos << L" non-destructed objects detected (all pool memory got freed)" << std::endl;
+			std::wcerr << L"Warning " << m_free_pos << L" non-destructed objects detected (all pool memory was freed)" << std::endl;
 	}
 
 	template<typename... Args, typename = std::enable_if_t<std::is_constructible<T, Args...>::value>>

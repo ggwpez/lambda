@@ -12,7 +12,12 @@ interpreter::interpreter(inter_ops_t ops)
 
 void interpreter::free_change(ast_node_t& tree, int dir, int rec)
 {
-	if (tree->type == astt::VAR)
+	if (tree->type == astt::APP)
+	{
+		free_change(tree->c1, dir, rec);
+		free_change(tree->c2, dir, rec);
+	}
+	else if (tree->type == astt::VAR)
 	{
 		if (tree->var > rec)		// is it free?
 			tree->var += dir;
@@ -21,18 +26,19 @@ void interpreter::free_change(ast_node_t& tree, int dir, int rec)
 	{
 		free_change(tree->c2, dir, rec +1);
 	}
-	else if (tree->type == astt::APP)
-	{
-		free_change(tree->c1, dir, rec);
-		free_change(tree->c2, dir, rec);
-	}
+
 	else
 		assert("Unreachable" && 0);
 }
 
 void interpreter::substitute_and_dec_free(ast_node_t& M, ast_node_t const& N, int rec, int abs = 0)
 {
-	if (M->type == astt::VAR)
+	if (M->type == astt::APP)
+	{
+		substitute_and_dec_free(M->c2, N, rec, abs);
+		substitute_and_dec_free(M->c1, N, rec, abs);
+	}
+	else if (M->type == astt::VAR)
 	{
 		if (M->var == rec)				// bound by the outermost lambda?
 		{
@@ -44,33 +50,22 @@ void interpreter::substitute_and_dec_free(ast_node_t& M, ast_node_t const& N, in
 			--M->var;
 	}
 	else if (M->type == astt::ABS)
-	{
 		substitute_and_dec_free(M->c2, N, rec +1, abs +1);
-	}
-	else if (M->type == astt::APP)
-	{
-		substitute_and_dec_free(M->c1, N, rec, abs);
-		substitute_and_dec_free(M->c2, N, rec, abs);
-	}
 	else
 		assert("Unreachable" && 0);
 }
 
 bool interpreter::is_bound_in(ast_node_t const& tree, var_t var)
 {
-	if (tree->type == astt::VAR)
-	{
-		return (tree->var == var);
-	}
-	else if (tree->type == astt::ABS)
-	{
-		return is_bound_in(tree->c2, var +1);
-	}
-	else if (tree->type == astt::APP)
+	if (tree->type == astt::APP)
 	{
 		return (is_bound_in(tree->c1, var)
 			 || is_bound_in(tree->c2, var));
 	}
+	else if (tree->type == astt::VAR)
+		return (tree->var == var);
+	else if (tree->type == astt::ABS)
+		return is_bound_in(tree->c2, var +1);
 	else
 		assert("Unreachable" && 0);
 }

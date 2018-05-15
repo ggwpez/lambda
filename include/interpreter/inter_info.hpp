@@ -33,7 +33,7 @@ public:
 
 	std::wstring to_str() const
 	{
-		return L" Betas: " +std::to_wstring(betas)
+		return L"Betas: " +std::to_wstring(betas)
 			  +L" Etas: "  +std::to_wstring(etas ) + L" Steps: "  +std::to_wstring(steps)
 			  +L" Nodes: " +std::to_wstring(nodes);
 	}

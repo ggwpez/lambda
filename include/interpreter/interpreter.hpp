@@ -7,7 +7,6 @@
 #include <unordered_map>
 
 #include "inter_info.hpp"
-#include "scope.hpp"
 #include "ast.hpp"
 
 #define MAX_STEPS (1ull << 32)

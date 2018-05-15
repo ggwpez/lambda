@@ -7,12 +7,14 @@ ast::ast(ast_node_t const& p)
 {
 	if (p->type == astt::VAR)
 		this->var = p->var;
-	else if (p->type == astt::ABS || p->type == astt::APP)
+	else if (p->type == astt::APP)
 	{
-		if (p->type == astt::APP)
-			c1 = ast_traits::alloc(p->c1);
+		c1 = ast_traits::alloc(p->c1);
 		c2 = ast_traits::alloc(p->c2);
 	}
+	else if (p->type == astt::ABS)
+		c2 = ast_traits::alloc(p->c2);
+
 }
 
 ast::ast(ast_node_t&& p)
@@ -21,23 +23,24 @@ ast::ast(ast_node_t&& p)
 
 	if (p->type == astt::VAR)
 		this->var = std::move(p->var);
-	else if (p->type == astt::ABS || p->type == astt::APP)
+	else if (p->type == astt::APP)
 	{
-		if (p->type == astt::APP)
-			this->c1 = std::move(p->c1);
+		this->c1 = std::move(p->c1);
 		this->c2 = std::move(p->c2);
 	}
+	else if (p->type == astt::ABS)
+		this->c2 = std::move(p->c2);
 }
 
 ast::~ast()
 {
-	if (this->type == astt::ABS && c2)
-		ast_traits::free(c2);
-	else if (this->type == astt::APP)
+	if (this->type == astt::APP)
 	{
 		if (c1) ast_traits::free(c1);
 		if (c2) ast_traits::free(c2);
 	}
+	else if (this->type == astt::ABS && c2)
+		ast_traits::free(c2);
 }
 
 static std::unordered_map<var_t, std::wstring> de_brujin;

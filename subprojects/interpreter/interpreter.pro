@@ -23,8 +23,7 @@ SOURCES += \
 	../../src/interpreter/parser.cpp \
 	../../src/interpreter/split_string.cpp \
 	../../src/interpreter/tok.cpp \
-	../../src/interpreter/traits_allocator.cpp \
-	../../src/interpreter/scope.cpp
+	../../src/interpreter/traits_allocator.cpp
 
 HEADERS += \
 	../../include/interpreter/ast.hpp \
@@ -39,6 +38,5 @@ HEADERS += \
 	../../include/interpreter/split_string.hpp \
 	../../include/interpreter/tok.hpp \
 	../../include/interpreter/traits_allocator.hpp \
-	../../include/interpreter/scope.hpp \
 	../../include/interpreter/memory_pool.hpp
 

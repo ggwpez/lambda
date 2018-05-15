@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 include(../configure.pri)
-include(../warnings.pri)
+#include(../warnings.pri)
 
 QT -= core gui
 

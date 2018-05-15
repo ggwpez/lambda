@@ -39,7 +39,6 @@ struct tok
 	std::wstring to_str() const;
 
 	tokt type;
-	PAD(4);
 	unsigned long num;
 	std::wstring var;
 };

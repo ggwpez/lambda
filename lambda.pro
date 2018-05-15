@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-CONFIG -=c++11
+CONFIG -= c++11
 
 # sudo apt-get install libreadline6 libreadline6-dev
 QMAKE_CXXFLAGS +=-fopenmp -std=c++17
@@ -13,4 +13,4 @@ SUBDIRS += \
 #interpreter_lib.depends = interpreter
 #visualizer.depends = interpreter_lib
 
-#CONFIG += ordered*/
+CONFIG += ordered

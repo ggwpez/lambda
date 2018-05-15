@@ -15,7 +15,7 @@
 #include <unistd.h>
 #include <csignal>
 
-#define TEST 1
+#define TEST 0
 
 line_interpreter* ptr = nullptr;
 static void sigint_action(int signum)
@@ -92,7 +92,7 @@ int line_interpreter::run()
 	}
 	else
 	{
-		std::vector<evaled_exp> exps = interpret_line(L"5 5");//L"(map sqr (list-n 5))");
+		std::vector<evaled_exp> exps = interpret_line(L"6 6");//L"(map sqr (list-n 5))");
 		print(exps, (exps.size() == 1));
 	}
 
@@ -120,7 +120,7 @@ int line_interpreter::interpret_command(std::wstring const& cmd)
 	else if (cmd[1] == L's')
 		set_scope_file(cmd.substr(2, std::wstring::npos));
 	else if (cmd[1] == L't')
-		this->enable_trace = true;
+		this->enable_trace ^= true;
 	else
 		outl(MSG_B << L"Unknown command: '" << cmd << L'\'' << MSG_E);
 

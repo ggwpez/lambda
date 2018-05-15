@@ -5,7 +5,7 @@
 #include "defines.hpp"
 #include "memory_pool.hpp"
 
-#define USE_POOL 1
+#define USE_POOL 0
 #define POOL_SIZE 300000
 
 extern pool<ast, POOL_SIZE> global_pool;
